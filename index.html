@@ -1,72 +1,68 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Panel Escolar Greenland</title>
-<meta name="robots" content="noindex, nofollow">
-<style>
-  * { box-sizing:border-box; margin:0; padding:0; }
-  html, body { height:100%; }
-  body {
-    font-family:-apple-system,'Segoe UI',Arial,sans-serif;
-    background:#1C1917;
-    overflow:hidden;
-  }
-  #loading {
-    position:fixed; inset:0; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:14px;
-    background:#1C1917; color:#D4A853; z-index:2;
-    transition:opacity .3s ease;
-  }
-  #loading.hide { opacity:0; pointer-events:none; }
-  #loading .logo {
-    font-family:Georgia,'Times New Roman',serif; font-style:italic;
-    font-size:22px; color:#D4A853;
-  }
-  #loading .sub { font-size:12px; color:#A8A29E; letter-spacing:.4px; }
-  .spinner {
-    width:26px; height:26px; border-radius:50%;
-    border:2.5px solid #3a3632; border-top-color:#D4A853;
-    animation:spin .8s linear infinite;
-  }
-  @keyframes spin { to { transform:rotate(360deg); } }
-  iframe {
-    position:fixed; inset:0; width:100%; height:100%;
-    border:none; display:block;
-  }
-</style>
+<meta name="theme-color" content="#121212">
+<meta name="mobile-web-app-capable" content="yes">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PETGS</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0; width: 100%; height: 100%;
+      overflow: hidden; background: #121212; color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    #loader {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 1; background: #121212; transition: opacity 0.3s ease;
+    }
+    .spinner {
+      width: 38px; height: 38px; border: 3px solid #282828; border-top-color: #1db954;
+      border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    p { color: #888; font-size: 0.9rem; margin: 0; }
+    iframe {
+      width: 100%; height: 100%; border: none;
+      position: absolute; top: 0; left: 0; z-index: 2;
+    }
+  </style>
 </head>
 <body>
 
-  <div id="loading">
+  <!-- Pantalla de carga estética mientras carga Apps Script -->
+  <div id="loader">
     <div class="spinner"></div>
-    <div class="logo">Panel Escolar</div>
-    <div class="sub">Cargando...</div>
+    <p>Abriendo Panel Escolar...</p>
   </div>
 
-  <iframe
-    id="marco"
-    src="https://script.google.com/macros/s/AKfycbzioxBW8vF517Xwm14nobaotPygrCudiKPgkPXW07C6rPYceWtHgt43UleRvDvCTYXDkw/exec"
-    allow="clipboard-write; clipboard-read"
-    title="Panel Escolar Greenland">
-  </iframe>
+  <!-- El contenedor de la app -->
+  <iframe id="app-frame" allow="autoplay"></iframe>
 
   <script>
-    var marco = document.getElementById('marco');
-    var loading = document.getElementById('loading');
-    marco.addEventListener('load', function () {
-      loading.classList.add('hide');
-      setTimeout(function () { loading.style.display = 'none'; }, 350);
-    });
-    // Si por algun motivo el iframe tarda demasiado o no dispara 'load'
-    // (bloqueo del navegador, red lenta), quitar el loader igual tras 8s
-    // para no dejar a la persona mirando un spinner para siempre.
-    setTimeout(function () {
-      loading.classList.add('hide');
-      setTimeout(function () { loading.style.display = 'none'; }, 350);
-    }, 8000);
+    // Tu URL base de Apps Script
+    var URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbyZBkQKxDKDw2de5s8TNfBV--rjhEBRgX3iG-tRik00TOkwAYQ8s-rTtFRW4L2xt8YHYw/exec";
+
+    // Captura los parámetros que vienen en la barra de direcciones (?playlist=xyz, etc.)
+    var queryParams = window.location.search;
+
+    // Asigna la URL completa con parámetros al src del iframe
+    var iframe = document.getElementById("app-frame");
+    iframe.src = URL_APPS_SCRIPT + queryParams;
+
+    // Oculta el loader cuando el iframe termine de cargar
+    iframe.onload = function() {
+      var loader = document.getElementById("loader");
+      if (loader) {
+        loader.style.opacity = "0";
+        setTimeout(function() { loader.style.display = "none"; }, 300);
+      }
+    };
   </script>
 
+
+  
 </body>
 </html>
