@@ -11,9 +11,6 @@
     <link rel="icon" href="data:,">
 
     <style>
-        /* Solución al error CSP: Importar la fuente desde CSS en lugar de usar <link> */
-        @import url('https://fonts.googleapis.com/css2?family=Overpass:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-
         * {
             box-sizing: border-box;
         }
@@ -26,8 +23,8 @@
             overflow: hidden;
             background: #121212;
             color: #fff;
-            /* Se aplica la fuente Overpass aquí */
-            font-family: 'Overpass', 'Segoe UI', sans-serif;
+            /* Usamos fuentes del sistema para evitar el bloqueo de seguridad (CSP) */
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         #loader {
@@ -87,10 +84,10 @@
     <iframe id="app-frame" allow="autoplay"></iframe>
 
     <script>
-        // Tu URL base de Apps Script
+        // URL base de Apps Script para PETGS
         var URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbyZBkQKxDKDw2de5s8TNfBV--rjhEBRgX3iG-tRik00TOkwAYQ8s-rTtFRW4L2xt8YHYw/exec";
         
-        // Captura los parámetros que vienen en la barra de direcciones (?playlist=xyz, etc.)
+        // Captura los parámetros que vienen en la barra de direcciones
         var queryParams = window.location.search;
         
         // Asigna la URL completa con parámetros al src del iframe
