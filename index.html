@@ -1,124 +1,169 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta name="theme-color" content="#1C1917">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Escolar Greenland</title>
-    <!-- Solución al error 404 (falta de favicon) -->
-    <link rel="icon" href="data:,">
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: #1C1917;
-            color: #fff;
-            /* Fuentes de sistema para evitar el bloqueo de seguridad (CSP) de Apps Script */
-            font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-        #loader {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1;
-            background: #1C1917;
-            transition: opacity 0.3s ease;
-        }
-        .logo {
-            font-family: Georgia, 'Times New Roman', serif;
-            font-style: italic;
-            font-weight: 300;
-            font-size: 22px;
-            color: #fff;
-            letter-spacing: -.3px;
-            margin-bottom: 18px;
-        }
-        .logo em {
-            font-style: italic;
-            color: #D4A853;
-        }
-        .spinner {
-            width: 26px;
-            height: 26px;
-            border: 2.5px solid #3a3632;
-            border-top-color: #D4A853;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-bottom: 14px;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        p {
-            color: #A8A29E;
-            font-size: 12px;
-            letter-spacing: .3px;
-            margin: 0;
-        }
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 2;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="theme-color" content="#1C1917">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Panel Escolar</title>
+<meta name="robots" content="noindex, nofollow">
+<!-- Solucion al 404 de favicon -->
+<link rel="icon" href="data:,">
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html, body { height:100%; }
+  body {
+    font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    background:#1C1917;
+    color:#fff;
+    overflow:hidden;
+  }
+
+  /* Pantalla de configuracion (primera vez en este navegador) */
+  #config {
+    position:fixed; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; padding:24px; z-index:3;
+  }
+  .logo {
+    font-family:Georgia,'Times New Roman',serif; font-style:italic;
+    font-weight:300; font-size:24px; margin-bottom:6px; text-align:center;
+  }
+  .logo em { font-style:italic; color:#D4A853; }
+  .caja {
+    background:#252220; border-radius:16px; padding:28px 26px;
+    max-width:360px; width:100%; margin-top:20px;
+    box-shadow:0 8px 32px rgba(0,0,0,.4);
+  }
+  .caja p {
+    font-size:12px; color:#A8A29E; line-height:1.6; margin-bottom:16px;
+  }
+  #inputUrl {
+    width:100%; padding:13px; border-radius:10px; border:1.5px solid #3a3632;
+    background:#1C1917; color:#fff; font-size:13px; margin-bottom:12px;
+    font-family:'DM Mono',monospace;
+  }
+  #inputUrl:focus { outline:none; border-color:#D4A853; }
+  #btnGuardar {
+    width:100%; padding:13px; border:none; border-radius:10px;
+    background:#D4A853; color:#1C1917; font-weight:700; font-size:14px; cursor:pointer;
+  }
+  #btnGuardar:active { opacity:.85; }
+  .errorCfg { color:#E8614A; font-size:12px; text-align:center; min-height:16px; margin-top:10px; }
+  #btnOlvidar {
+    display:block; margin:18px auto 0; background:none; border:none;
+    color:#6b6560; font-size:11px; cursor:pointer; text-decoration:underline;
+  }
+
+  /* Loader mientras carga el iframe */
+  #loading {
+    position:fixed; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:14px;
+    background:#1C1917; z-index:2; transition:opacity .3s ease;
+  }
+  #loading.hide { opacity:0; pointer-events:none; }
+  #loading .sub { font-size:12px; color:#A8A29E; letter-spacing:.4px; }
+  .spinner {
+    width:26px; height:26px; border-radius:50%;
+    border:2.5px solid #3a3632; border-top-color:#D4A853;
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  iframe {
+    position:fixed; inset:0; width:100%; height:100%;
+    border:none; display:none; z-index:1;
+  }
+</style>
 </head>
 <body>
-    <!-- Pantalla de carga con el estilo del panel -->
-    <div id="loader">
-        <div class="logo">Panel <em>Escolar</em></div>
-        <div class="spinner"></div>
-        <p>Abriendo panel...</p>
+
+  <!-- Pantalla de configuracion: solo aparece si este navegador no tiene nada guardado -->
+  <div id="config" style="display:none">
+    <div class="logo">Panel <em>Escolar</em></div>
+    <div class="caja">
+      <p>
+        Pega aca tu URL personal completa (incluye tu token). Esta pagina
+        NUNCA guarda ni transmite ese valor a ningun servidor propio — solo
+        queda en la memoria de ESTE navegador, en este dispositivo.
+      </p>
+      <input type="text" id="inputUrl" placeholder="https://script.google.com/macros/s/.../exec?token=..." autocomplete="off" spellcheck="false">
+      <button id="btnGuardar">Entrar</button>
+      <div class="errorCfg" id="errorCfg"></div>
+      <button id="btnOlvidar">Olvidar URL guardada en este navegador</button>
     </div>
-    <!-- Contenedor de la app -->
-    <iframe id="app-frame" allow="autoplay; clipboard-write; clipboard-read" title="Panel Escolar Greenland"></iframe>
-    <script>
-        // URL base de Apps Script para Panel Escolar Greenland
-        var URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbwSLAqgZDRNWvOlEyh8Wk_cpk2N6qkenCC6BsfW2L2pjCP-wB96_ND0ObAd8DcsObLP/exec";
+  </div>
 
-        // Captura los parámetros que vienen en la barra de direcciones
-        var queryParams = window.location.search;
+  <!-- Loader -->
+  <div id="loading" style="display:none">
+    <div class="spinner"></div>
+    <div class="logo" style="font-size:20px">Panel <em>Escolar</em></div>
+    <div class="sub">Abriendo panel...</div>
+  </div>
 
-        // Asigna la URL completa con parámetros al src del iframe
-        var iframe = document.getElementById("app-frame");
-        iframe.src = URL_APPS_SCRIPT + queryParams;
+  <!-- Panel real -->
+  <iframe id="marco" allow="clipboard-write; clipboard-read" title="Panel Escolar"></iframe>
 
-        // Oculta el loader cuando el iframe termine de cargar
-        iframe.onload = function() {
-            var loader = document.getElementById("loader");
-            if (loader) {
-                loader.style.opacity = "0";
-                setTimeout(function() {
-                    loader.style.display = "none";
-                }, 300);
-            }
-        };
+  <script>
+    var CLAVE_LOCAL = 'panel_escolar_url';
 
-        // Respaldo: si por algún motivo 'load' no dispara (red lenta, bloqueo),
-        // quitar el loader igual tras 8s para no dejar a la persona esperando indefinidamente
-        setTimeout(function() {
-            var loader = document.getElementById("loader");
-            if (loader && loader.style.display !== "none") {
-                loader.style.opacity = "0";
-                setTimeout(function() { loader.style.display = "none"; }, 300);
-            }
-        }, 8000);
-    </script>
+    function mostrarPanel(url) {
+      document.getElementById('config').style.display = 'none';
+      document.getElementById('loading').style.display = 'flex';
+      var marco = document.getElementById('marco');
+      marco.src = url;
+      marco.style.display = 'block';
+      marco.addEventListener('load', function () {
+        var loading = document.getElementById('loading');
+        loading.classList.add('hide');
+        setTimeout(function () { loading.style.display = 'none'; }, 300);
+      });
+      // Respaldo: si 'load' nunca dispara, quitar el loader igual tras 8s
+      setTimeout(function () {
+        var loading = document.getElementById('loading');
+        if (loading && loading.style.display !== 'none') {
+          loading.classList.add('hide');
+          setTimeout(function () { loading.style.display = 'none'; }, 300);
+        }
+      }, 8000);
+    }
+
+    function mostrarConfig() {
+      document.getElementById('config').style.display = 'flex';
+    }
+
+    function intentarEntrar() {
+      var url = document.getElementById('inputUrl').value.trim();
+      var err = document.getElementById('errorCfg');
+      err.textContent = '';
+      if (!url.startsWith('https://script.google.com/')) {
+        err.textContent = 'Debe ser una URL de script.google.com';
+        return;
+      }
+      if (url.indexOf('token=') < 0) {
+        err.textContent = 'Falta el ?token=... al final de la URL';
+        return;
+      }
+      localStorage.setItem(CLAVE_LOCAL, url);
+      mostrarPanel(url);
+    }
+
+    document.getElementById('btnGuardar').addEventListener('click', intentarEntrar);
+    document.getElementById('inputUrl').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') intentarEntrar();
+    });
+    document.getElementById('btnOlvidar').addEventListener('click', function () {
+      localStorage.removeItem(CLAVE_LOCAL);
+      location.reload();
+    });
+
+    // Al cargar: si ya hay una URL guardada en ESTE navegador, entrar directo
+    var guardada = localStorage.getItem(CLAVE_LOCAL);
+    if (guardada) {
+      mostrarPanel(guardada);
+    } else {
+      mostrarConfig();
+    }
+  </script>
+
 </body>
 </html>
