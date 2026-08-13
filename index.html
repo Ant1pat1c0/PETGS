@@ -73,6 +73,13 @@
     position:fixed; inset:0; width:100%; height:100%;
     border:none; display:none; z-index:1;
   }
+  #btnSalir {
+    position:fixed; bottom:14px; right:14px; z-index:4;
+    background:rgba(37,34,32,.92); color:#A8A29E; border:1px solid #3a3632;
+    border-radius:20px; padding:7px 14px; font-size:11px; cursor:pointer;
+    display:none; backdrop-filter:blur(4px);
+  }
+  #btnSalir:active { opacity:.7; }
 </style>
 </head>
 <body>
@@ -102,6 +109,7 @@
 
   <!-- Panel real -->
   <iframe id="marco" allow="clipboard-write; clipboard-read" title="Panel Escolar"></iframe>
+  <button id="btnSalir">Salir</button>
 
   <script>
     var CLAVE_LOCAL = 'panel_escolar_url';
@@ -109,6 +117,7 @@
     function mostrarPanel(url) {
       document.getElementById('config').style.display = 'none';
       document.getElementById('loading').style.display = 'flex';
+      document.getElementById('btnSalir').style.display = 'block';
       var marco = document.getElementById('marco');
       marco.src = url;
       marco.style.display = 'block';
@@ -154,6 +163,19 @@
     document.getElementById('btnOlvidar').addEventListener('click', function () {
       localStorage.removeItem(CLAVE_LOCAL);
       location.reload();
+    });
+
+    document.getElementById('btnSalir').addEventListener('click', function () {
+      var urlGuardada = localStorage.getItem(CLAVE_LOCAL);
+      localStorage.removeItem(CLAVE_LOCAL);
+      if (urlGuardada) {
+        // Avisar al servidor que revoque la sesion (todas las sesiones de esta persona)
+        var separador = urlGuardada.indexOf('?') >= 0 ? '&' : '?';
+        var urlCierre = urlGuardada + separador + 'cerrar=1';
+        var marco = document.getElementById('marco');
+        marco.src = urlCierre;
+      }
+      setTimeout(function () { location.reload(); }, 600);
     });
 
     // Al cargar: si ya hay una URL guardada en ESTE navegador, entrar directo
