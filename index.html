@@ -23,35 +23,45 @@
   #config {
     position:fixed; inset:0; display:flex; flex-direction:column;
     align-items:center; justify-content:center; padding:24px; z-index:3;
+    background:radial-gradient(circle at 50% 0%,#2a2622 0%,#1C1917 60%);
   }
   .logo {
     font-family:Georgia,'Times New Roman',serif; font-style:italic;
-    font-weight:300; font-size:24px; margin-bottom:6px; text-align:center;
+    font-weight:300; font-size:26px; letter-spacing:-.3px; text-align:center;
   }
   .logo em { font-style:italic; color:#D4A853; }
   .caja {
-    background:#252220; border-radius:16px; padding:28px 26px;
-    max-width:360px; width:100%; margin-top:20px;
-    box-shadow:0 8px 32px rgba(0,0,0,.4);
+    background:#252220; border-radius:20px; padding:32px 28px;
+    max-width:360px; width:100%; margin-top:22px;
+    box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04);
+    animation:aparecerCfg .35s ease;
   }
+  @keyframes aparecerCfg{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   .caja p {
-    font-size:12px; color:#A8A29E; line-height:1.6; margin-bottom:16px;
+    font-size:12.5px; color:#A8A29E; line-height:1.65; margin-bottom:24px;
   }
-  #inputUrl {
-    width:100%; padding:13px; border-radius:10px; border:1.5px solid #3a3632;
-    background:#1C1917; color:#fff; font-size:13px; margin-bottom:12px;
-    font-family:'DM Mono',monospace;
+  .campoLabel {
+    display:block; font-size:11px; color:#8f897f; margin-bottom:8px;
+    letter-spacing:.4px; font-weight:600; text-transform:uppercase;
   }
-  #inputUrl:focus { outline:none; border-color:#D4A853; }
+  .inputCfg {
+    width:100%; padding:14px; border-radius:12px; border:1.5px solid #3a3632;
+    background:#181614; color:#fff; font-size:13px; margin-bottom:18px;
+    font-family:'DM Mono',monospace; transition:border-color .15s;
+  }
+  .inputCfg:focus { outline:none; border-color:#D4A853; }
+  .inputCfg::placeholder { color:#454039; font-style:italic; }
   #btnGuardar {
-    width:100%; padding:13px; border:none; border-radius:10px;
-    background:#D4A853; color:#1C1917; font-weight:700; font-size:14px; cursor:pointer;
+    width:100%; padding:14px; border:none; border-radius:12px;
+    background:linear-gradient(180deg,#DFB865,#D4A853); color:#1C1917;
+    font-weight:700; font-size:14px; cursor:pointer;
+    box-shadow:0 4px 14px rgba(212,168,83,.25); transition:transform .1s,box-shadow .15s;
   }
-  #btnGuardar:active { opacity:.85; }
-  .errorCfg { color:#E8614A; font-size:12px; text-align:center; min-height:16px; margin-top:10px; }
+  #btnGuardar:active { transform:translateY(1px); box-shadow:0 2px 8px rgba(212,168,83,.2); }
+  .errorCfg { color:#E8614A; font-size:12px; text-align:center; min-height:16px; margin-top:12px; font-weight:500; }
   #btnOlvidar {
-    display:block; margin:18px auto 0; background:none; border:none;
-    color:#6b6560; font-size:11px; cursor:pointer; text-decoration:underline;
+    display:block; margin:20px auto 0; background:none; border:none;
+    color:#5a554e; font-size:11px; cursor:pointer; text-decoration:underline;
   }
 
   /* Loader mientras carga el iframe */
@@ -93,10 +103,12 @@
         NUNCA los guarda ni transmite a ningun servidor propio — solo
         quedan en la memoria de ESTE navegador, en este dispositivo.
       </p>
-      <label style="display:block;font-size:11px;color:#A8A29E;margin-bottom:6px;text-align:left">ID de implementacion</label>
-      <input type="text" id="inputId" placeholder="AKfycb..." autocomplete="off" spellcheck="false" style="margin-bottom:14px">
-      <label style="display:block;font-size:11px;color:#A8A29E;margin-bottom:6px;text-align:left">Token</label>
-      <input type="text" id="inputToken" placeholder="4d5d6932..." autocomplete="off" spellcheck="false">
+      <label class="campoLabel" for="inputId">ID de implementacion</label>
+      <input class="inputCfg" type="text" id="inputId" placeholder="Pega aqui el ID (ej: AKfycb...)" autocomplete="off" spellcheck="false" oninput="document.getElementById('contadorId').textContent=this.value.trim().length+' caracteres'">
+      <div style="font-size:10px;color:#454039;margin:-12px 0 6px" id="contadorId"></div>
+      <label class="campoLabel" for="inputToken">Token</label>
+      <input class="inputCfg" type="text" id="inputToken" placeholder="Pega aqui tu token personal" autocomplete="off" spellcheck="false" oninput="document.getElementById('contadorToken').textContent=this.value.trim().length+' caracteres'">
+      <div style="font-size:10px;color:#454039;margin:-12px 0 18px" id="contadorToken"></div>
       <button id="btnGuardar">Entrar</button>
       <div class="errorCfg" id="errorCfg"></div>
       <button id="btnOlvidar">Olvidar datos guardados en este navegador</button>
