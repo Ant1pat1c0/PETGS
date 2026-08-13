@@ -163,6 +163,19 @@
       mostrarPanel(construirUrl(id, token));
     }
 
+    // Vuelve al estado inicial (pantalla de ID+Token) sin depender de recargar la pagina
+    function resetearAConfig() {
+      var marco = document.getElementById('marco');
+      marco.src = 'about:blank';
+      marco.style.display = 'none';
+      document.getElementById('btnSalir').style.display = 'none';
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('inputId').value = '';
+      document.getElementById('inputToken').value = '';
+      document.getElementById('errorCfg').textContent = '';
+      mostrarConfig();
+    }
+
     document.getElementById('btnGuardar').addEventListener('click', intentarEntrar);
     document.getElementById('inputId').addEventListener('keydown', function (e) {
       if (e.key === 'Enter') document.getElementById('inputToken').focus();
@@ -173,7 +186,7 @@
     document.getElementById('btnOlvidar').addEventListener('click', function () {
       localStorage.removeItem(CLAVE_ID);
       localStorage.removeItem(CLAVE_TOKEN);
-      location.reload();
+      resetearAConfig();
     });
 
     document.getElementById('btnSalir').addEventListener('click', function () {
@@ -182,12 +195,15 @@
       localStorage.removeItem(CLAVE_ID);
       localStorage.removeItem(CLAVE_TOKEN);
       if (idGuardado && tokenGuardado) {
-        // Avisar al servidor que revoque la sesion (todas las sesiones de esta persona)
-        var urlCierre = construirUrl(idGuardado, tokenGuardado) + '&cerrar=1';
-        var marco = document.getElementById('marco');
-        marco.src = urlCierre;
+        // Avisar al servidor que revoque la sesion (todas las sesiones de esta persona),
+        // en un iframe invisible temporal para no afectar lo que se ve en pantalla
+        var invisible = document.createElement('iframe');
+        invisible.style.display = 'none';
+        invisible.src = construirUrl(idGuardado, tokenGuardado) + '&cerrar=1';
+        document.body.appendChild(invisible);
+        setTimeout(function () { invisible.remove(); }, 2000);
       }
-      setTimeout(function () { location.reload(); }, 600);
+      resetearAConfig();
     });
 
     // Al cargar: si ya hay datos guardados en ESTE navegador, entrar directo
