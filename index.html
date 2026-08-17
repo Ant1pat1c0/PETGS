@@ -228,23 +228,31 @@
       resetearAConfig();
     });
 
-    document.getElementById('btnSalir').addEventListener('click', function () {
+    // SALIR: solo cierra la sesion de ESTE dispositivo. Guarda ID y token para
+// no tener que volver a pegarlos - la proxima vez solo pide PIN+codigo de nuevo.
+document.getElementById('btnSalir').addEventListener('click', function () {
+      localStorage.removeItem(CLAVE_SESION);
       var idGuardado = localStorage.getItem(CLAVE_ID);
       var tokenGuardado = localStorage.getItem(CLAVE_TOKEN);
-      localStorage.removeItem(CLAVE_ID);
-      localStorage.removeItem(CLAVE_TOKEN);
-      localStorage.removeItem(CLAVE_SESION);
       if (idGuardado && tokenGuardado) {
-        // Avisar al servidor que revoque la sesion (todas las sesiones de esta persona),
-        // en un iframe invisible temporal para no afectar lo que se ve en pantalla
-        var invisible = document.createElement('iframe');
-        invisible.style.display = 'none';
-        invisible.src = construirUrl(idGuardado, tokenGuardado) + '&cerrar=1';
-        document.body.appendChild(invisible);
-        setTimeout(function () { invisible.remove(); }, 2000);
+        // Recargar con el ID+token (sin sesion, ya la borramos) - vuelve a la pantalla de PIN directo
+        mostrarPanel(construirUrl(idGuardado, tokenGuardado));
+      } else {
+        resetearAConfig();
       }
-      resetearAConfig();
     });
+
+// OLVIDAR DISPOSITIVO: llega desde el link dentro de la pantalla de login
+// (la IA del otro lado del iframe no puede tocar nuestro localStorage directo -
+// por eso usa postMessage para avisarnos, y aca borramos todo de verdad).
+window.addEventListener('message', function (evento) {
+  if (evento && evento.data && evento.data.tipo === 'olvidar_dispositivo') {
+    localStorage.removeItem(CLAVE_ID);
+    localStorage.removeItem(CLAVE_TOKEN);
+    localStorage.removeItem(CLAVE_SESION);
+    setTimeout(resetearAConfig, 1200); // dar tiempo a que se vea el mensaje de confirmacion primero
+  }
+});
 
     // Al cargar: si ya hay datos guardados en ESTE navegador, entrar directo
     var idGuardadoInicio = localStorage.getItem(CLAVE_ID);
