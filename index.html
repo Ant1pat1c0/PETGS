@@ -79,17 +79,21 @@
   }
   @keyframes spin { to { transform:rotate(360deg); } }
 
-  iframe {
-    position:fixed; inset:0; width:100%; height:100%;
-    border:none; display:none; z-index:1;
+  #barraSuperior {
+    position:fixed; top:0; left:0; right:0; height:34px; z-index:5;
+    background:#161412; border-bottom:1px solid #2a2622;
+    display:none; align-items:center; justify-content:flex-end; padding:0 12px;
   }
   #btnSalir {
-    position:fixed; top:14px; right:14px; z-index:4;
-    background:rgba(37,34,32,.92); color:#A8A29E; border:1px solid #3a3632;
-    border-radius:20px; padding:7px 14px; font-size:11px; cursor:pointer;
-    display:none; backdrop-filter:blur(4px);
+    background:none; border:none; color:#8f897f; font-size:11px;
+    cursor:pointer; padding:6px 8px;
   }
-  #btnSalir:active { opacity:.7; }
+  #btnSalir:active { opacity:.6; }
+  iframe {
+    position:fixed; left:0; right:0; bottom:0; top:0; width:100%;
+    border:none; display:none; z-index:1;
+  }
+  iframe.conBarra { top:34px; height:calc(100% - 34px); }
 </style>
 </head>
 <body>
@@ -123,8 +127,10 @@
   </div>
 
   <!-- Panel real -->
+  <div id="barraSuperior">
+    <button id="btnSalir">Salir</button>
+  </div>
   <iframe id="marco" allow="clipboard-write; clipboard-read" title="Panel Escolar"></iframe>
-  <button id="btnSalir">Salir</button>
 
   <script>
     var CLAVE_ID = 'panel_escolar_id';
@@ -155,8 +161,9 @@
     function mostrarPanel(url) {
       document.getElementById('config').style.display = 'none';
       document.getElementById('loading').style.display = 'flex';
-      document.getElementById('btnSalir').style.display = 'block';
+      document.getElementById('barraSuperior').style.display = 'flex';
       var marco = document.getElementById('marco');
+      marco.classList.add('conBarra');
       marco.src = url;
       marco.style.display = 'block';
       marco.addEventListener('load', function () {
@@ -198,7 +205,8 @@
       var marco = document.getElementById('marco');
       marco.src = 'about:blank';
       marco.style.display = 'none';
-      document.getElementById('btnSalir').style.display = 'none';
+      marco.classList.remove('conBarra');
+      document.getElementById('barraSuperior').style.display = 'none';
       document.getElementById('loading').style.display = 'none';
       document.getElementById('inputId').value = '';
       document.getElementById('inputToken').value = '';
