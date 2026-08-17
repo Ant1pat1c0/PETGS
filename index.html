@@ -84,7 +84,7 @@
     border:none; display:none; z-index:1;
   }
   #btnSalir {
-    position:fixed; bottom:14px; right:14px; z-index:4;
+    position:fixed; top:14px; right:14px; z-index:4;
     background:rgba(37,34,32,.92); color:#A8A29E; border:1px solid #3a3632;
     border-radius:20px; padding:7px 14px; font-size:11px; cursor:pointer;
     display:none; backdrop-filter:blur(4px);
@@ -129,10 +129,28 @@
   <script>
     var CLAVE_ID = 'panel_escolar_id';
     var CLAVE_TOKEN = 'panel_escolar_token';
+    var CLAVE_SESION = 'panel_escolar_sesion';
 
     function construirUrl(id, token) {
-      return 'https://script.google.com/macros/s/' + id + '/exec?token=' + token;
+      var url = 'https://script.google.com/macros/s/' + id + '/exec?token=' + token;
+      var sesionGuardada = localStorage.getItem(CLAVE_SESION);
+      if (sesionGuardada) url += '&sesion=' + sesionGuardada;
+      return url;
     }
+
+    // Escuchar avisos del iframe (dominio de Google) cuando se crea una sesion
+    // nueva tras PIN+TOTP. Su localStorage es una caja separada del nuestro,
+    // por eso no podemos leerlo directo - postMessage es el puente entre dominios.
+    window.addEventListener('message', function(evento) {
+      if (evento && evento.data && evento.data.tipo === 'panel_sesion' && evento.data.sesion) {
+        if (evento.data.recordar) {
+          localStorage.setItem(CLAVE_SESION, evento.data.sesion);
+        }
+        // Si no marco "recordar", no guardamos nada - la sesion corta (4h) sigue
+        // viva del lado del servidor, pero no queremos que sobreviva a cerrar
+        // la app en un dispositivo que dijo explicitamente que no es personal.
+      }
+    });
 
     function mostrarPanel(url) {
       document.getElementById('config').style.display = 'none';
@@ -198,6 +216,7 @@
     document.getElementById('btnOlvidar').addEventListener('click', function () {
       localStorage.removeItem(CLAVE_ID);
       localStorage.removeItem(CLAVE_TOKEN);
+      localStorage.removeItem(CLAVE_SESION);
       resetearAConfig();
     });
 
@@ -206,6 +225,7 @@
       var tokenGuardado = localStorage.getItem(CLAVE_TOKEN);
       localStorage.removeItem(CLAVE_ID);
       localStorage.removeItem(CLAVE_TOKEN);
+      localStorage.removeItem(CLAVE_SESION);
       if (idGuardado && tokenGuardado) {
         // Avisar al servidor que revoque la sesion (todas las sesiones de esta persona),
         // en un iframe invisible temporal para no afectar lo que se ve en pantalla
